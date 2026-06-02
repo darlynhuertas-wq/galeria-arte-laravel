@@ -27,7 +27,8 @@ class AuthController extends Controller {
             $request->session()->regenerate(); // Escudo de seguridad contra secuestro de sesiones
             
             if (Auth::user()->rol === 'admin') {
-                return redirect()->route('artistas.index')->with('success', '¡Bienvenido Administrador!');
+                return redirect()->route('dashboard')
+                    ->with('success', '¡Bienvenido Administrador!');
             }
             return redirect()->route('galeria.index')->with('success', '¡Sesión iniciada con éxito!');
         }

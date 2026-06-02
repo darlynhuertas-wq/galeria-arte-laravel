@@ -1,59 +1,79 @@
 @extends('layouts.app')
 @section('title', 'Control de Catálogo de Obras')
+
 @section('content')
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+<div class="page-title-row">
     <div>
-        <h2 style="font-size: 2rem; margin: 0; font-family: 'Playfair Display', serif;">Catálogo de Obras Oficiales</h2>
-        <p style="color: var(--text-muted); margin: 0;">Administración central de pinturas y esculturas de la colección.</p>
+        <h2 class="page-title">Catálogo de Obras</h2>
+        <p class="page-subtitle">Administración central de la colección.</p>
     </div>
-    <a href="{{ route('obras.create') }}" class="btn btn-gold">🎨 Catalogar Nueva Obra</a>
+    <a href="{{ route('obras.create') }}" class="btn btn-gold">+ Nueva Obra</a>
 </div>
 
-<div class="panel-table-container">
+<div class="panel">
+    <div class="panel-header">
+        <div>
+            <div class="panel-title">Obras registradas</div>
+            <div class="panel-subtitle">{{ $obras->count() }} obra(s) en catálogo</div>
+        </div>
+    </div>
     <table class="custom-table">
         <thead>
             <tr>
-                <th style="text-align: center; width: 110px;">Exhibición</th>
-                <th>Título de la Obra</th>
-                <th>Maestro Autor</th>
+                <th style="width:80px;text-align:center">Imagen</th>
+                <th>Título</th>
+                <th>Artista</th>
                 <th>Ficha Técnica</th>
-                <th>Valoración</th>
-                <th style="text-align: center; width: 180px;">Acciones</th>
+                <th>Precio</th>
+                <th style="text-align:center;width:200px">Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($obras as $obra)
+            @forelse($obras as $obra)
             <tr>
-                <td style="text-align: center;">
+                <td style="text-align:center">
                     @if($obra->imagen)
-                        <img src="{{ asset('images/' . $obra->imagen) }}" style="width: 70px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);">
+                        <img src="{{ asset('uploads/obras/'.$obra->imagen) }}" class="table-thumb">
                     @else
-                        <div style="width: 70px; height: 50px; background: #f1f5f9; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #94a3b8;">🖼️</div>
+                        <div style="width:52px;height:40px;background:var(--cream-2);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--text-3);border:1px solid var(--border)">🖼️</div>
                     @endif
                 </td>
                 <td>
-                    <span style="font-size: 1.05rem; font-weight: 600; color: var(--primary); font-family: 'Playfair Display', serif;">{{ $obra->titulo }}</span>
-                    <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">Catálogo ID: #{{ $obra->id }}</small>
+                    <div style="font-weight:700;font-family:'Playfair Display',serif;font-size:0.97rem;color:var(--text)">{{ $obra->titulo }}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-3);margin-top:2px">#{{ $obra->id }}</div>
                 </td>
-                <td style="color: var(--gold); font-weight: 500;">👤 {{ $obra->artista->nombre ?? 'Sin Autor' }}</td>
-                <td style="color: var(--text-muted); font-size: 0.9rem;">
-                    <span style="display: block;"><strong>Técnica:</strong> {{ $obra->tecnica }}</span>
-                    <span style="display: block; font-size: 0.8rem;"><strong>Año:</strong> {{ $obra->anio }}</span>
+                <td>
+                    <span class="badge badge-gold">{{ $obra->artista->nombre ?? 'Sin Autor' }}</span>
                 </td>
-                <td><strong style="color: var(--primary); font-size: 1.05rem;">S/. {{ number_format($obra->precio, 2) }}</strong></td>
-                <td style="text-align: center;">
-                    <div style="display: inline-flex; gap: 8px;">
-                        <a href="{{ route('obras.edit', $obra->id) }}" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.85rem;">✏️ Editar</a>
-                        <form action="{{ route('obras.destroy', $obra->id) }}" method="POST" style="margin: 0;">
+                <td style="font-size:0.83rem;color:var(--text-2)">
+                    <div>{{ $obra->tecnica }}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text-3);margin-top:2px">{{ $obra->anio }}</div>
+                </td>
+                <td>
+                    <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text)">S/. {{ number_format($obra->precio, 2) }}</div>
+                </td>
+                <td style="text-align:center">
+                    <div style="display:inline-flex;gap:5px">
+                        <a href="{{ route('obras.show', $obra->id) }}" class="btn btn-outline btn-sm">Ver</a>
+                        <a href="{{ route('obras.edit', $obra->id) }}" class="btn btn-outline btn-sm">Editar</a>
+                        <form action="{{ route('obras.destroy', $obra->id) }}" method="POST" style="margin:0"
+                              onsubmit="return confirm('¿Eliminar esta obra definitivamente?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger-outline" style="padding: 6px 14px; font-size: 0.85rem;" onclick="return confirm('¿Remover obra?')">Rescindir 🗑️</button>
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
                         </form>
                     </div>
                 </td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="6" style="text-align:center;color:var(--text-3);padding:3.5rem;font-family:'Playfair Display',serif;font-style:italic;font-size:1rem">
+                    No hay obras registradas en el catálogo.
+                </td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
+
 @endsection

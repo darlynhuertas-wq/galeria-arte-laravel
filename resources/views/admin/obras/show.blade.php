@@ -1,11 +1,9 @@
 @extends('layouts.app')
-@section('title', $obra->titulo . ' — MUSeoVIRTUAL')
+@section('title', 'Detalle: '.$obra->titulo)
 
 @section('content')
 
-<a href="{{ route('galeria.index') }}" class="back-link">
-    ← Volver a la sala de exposición
-</a>
+<a href="{{ route('obras.index') }}" class="back-link">← Volver al catálogo</a>
 
 <div class="obra-detail-grid">
     <!-- Imagen -->
@@ -15,19 +13,19 @@
         @else
             <div style="text-align:center;color:var(--text-3);padding:60px 0">
                 <div style="width:84px;height:84px;border:1.5px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 16px;background:var(--cream-2)">🖼</div>
-                <p style="font-size:0.82rem;margin:0;font-family:'DM Mono',monospace">Visualización no disponible</p>
+                <p style="font-size:0.82rem;margin:0;font-family:'DM Mono',monospace">Sin imagen cargada</p>
             </div>
         @endif
     </div>
 
     <!-- Info -->
-    <div>
-        <span class="obra-tag">Ficha técnica de catálogo</span>
-        <h1 class="obra-titulo">{{ $obra->titulo }}</h1>
+    <div style="display:flex;flex-direction:column;justify-content:center">
+        <span class="obra-tag">Ficha técnica</span>
+        <h2 class="obra-titulo">{{ $obra->titulo }}</h2>
 
         <div class="obra-artista-block">
             <strong>{{ $obra->artista->nombre }}</strong>
-            <span>{{ $obra->artista->nacionalidad }}</span>
+            <span>Nacionalidad: {{ $obra->artista->nacionalidad }}</span>
         </div>
 
         <div class="obra-ficha">
@@ -42,22 +40,15 @@
         </div>
 
         <div class="obra-precio-section">
-            <div class="obra-precio-lbl">Precio de adquisición</div>
+            <div class="obra-precio-lbl">Precio de catálogo</div>
             <div class="obra-precio-val">S/. {{ number_format($obra->precio, 2) }}</div>
-            <form action="{{ route('carrito.agregar', $obra->id) }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-gold btn-lg btn-full">
-                    Añadir al carrito de colección →
-                </button>
-            </form>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:1.5rem">
+            <a href="{{ route('obras.edit', $obra->id) }}" class="btn btn-gold">Editar obra</a>
+            <a href="{{ route('obras.index') }}" class="btn btn-outline">Volver</a>
         </div>
     </div>
-</div>
-
-<!-- Bio del artista -->
-<div class="bio-section">
-    <h3 class="bio-section-title">Sobre {{ $obra->artista->nombre }}</h3>
-    <p style="color:var(--text-2);font-size:0.92rem;line-height:1.75;margin:0">{{ $obra->artista->bio }}</p>
 </div>
 
 @endsection

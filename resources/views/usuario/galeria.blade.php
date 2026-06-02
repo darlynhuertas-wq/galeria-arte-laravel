@@ -1,85 +1,223 @@
 @extends('layouts.app')
-@section('title', 'Exposición General de Obras')
+@section('title', 'Exposición — MUSeoVIRTUAL')
+
+@section('hero')
+<div class="page-hero">
+    <div class="page-hero-tag">✦ Colección Permanente</div>
+    <h1>Arte sin fronteras,<br><em>belleza sin límites</em></h1>
+    <p>Adquiere obras maestras de los grandes genios de la pintura universal directamente desde nuestra galería.</p>
+    <div class="stats-strip">
+        <div class="stats-strip-item">
+            <span class="stats-num">{{ $obras->count() }}</span>
+            <span class="stats-lbl">Obras</span>
+        </div>
+        <div class="stats-strip-item">
+            <span class="stats-num">{{ $artistas->count() }}</span>
+            <span class="stats-lbl">Artistas</span>
+        </div>
+        <div class="stats-strip-item">
+            <span class="stats-num">S/. {{ number_format($obras->sum('precio') / 1000000, 1) }}M</span>
+            <span class="stats-lbl">Valor colección</span>
+        </div>
+    </div>
+</div>
+@endsection
+
 @section('content')
 
-<div style="text-align: center; margin-bottom: 2.5rem;">
-    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem; letter-spacing: -0.5px;">Obras de Arte Disponibles</h2>
-    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1rem;">Disfruta de piezas maestras exclusivas. Usa los filtros para explorar colecciones específicas.</p>
+<div class="filters-bar">
+
+    <form action="{{ route('galeria.index') }}" method="GET" style="width:100%;">
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;">
+
+            <div style="flex:2;min-width:220px;">
+                <label class="form-label">Buscar por título</label>
+                <input
+                    type="text"
+                    name="buscar"
+                    value="{{ request('buscar') }}"
+                    placeholder="Ej: Mona Lisa"
+                    class="form-control">
+            </div>
+
+            <div style="min-width:180px;">
+                <label class="form-label">Técnica</label>
+                <select name="tecnica" class="form-control">
+
+                    <option value="">Todas las técnicas</option>
+
+                    <option value="Óleo"
+                        {{ request('tecnica') == 'Óleo' ? 'selected' : '' }}>
+                        Óleo
+                    </option>
+
+                    <option value="Acuarela"
+                        {{ request('tecnica') == 'Acuarela' ? 'selected' : '' }}>
+                        Acuarela
+                    </option>
+
+                    <option value="Acrílico"
+                        {{ request('tecnica') == 'Acrílico' ? 'selected' : '' }}>
+                        Acrílico
+                    </option>
+
+                </select>
+            </div>
+
+            <div style="min-width:180px;">
+                <label class="form-label">Precio</label>
+                <select name="precio" class="form-control">
+
+                    <option value="">Todos los precios</option>
+
+                    <option value="1"
+                        {{ request('precio') == '1' ? 'selected' : '' }}>
+                        Menos de S/.5000
+                    </option>
+
+                    <option value="2"
+                        {{ request('precio') == '2' ? 'selected' : '' }}>
+                        S/.5000 - S/.20000
+                    </option>
+
+                    <option value="3"
+                        {{ request('precio') == '3' ? 'selected' : '' }}>
+                        Más de S/.20000
+                    </option>
+
+                </select>
+            </div>
+
+            <div style="min-width:180px;">
+                <label class="form-label">Ordenar</label>
+                <select name="orden" class="form-control">
+
+                    <option value="">Ordenar por</option>
+
+                    <option value="precio_asc"
+                        {{ request('orden') == 'precio_asc' ? 'selected' : '' }}>
+                        Precio menor
+                    </option>
+
+                    <option value="precio_desc"
+                        {{ request('orden') == 'precio_desc' ? 'selected' : '' }}>
+                        Precio mayor
+                    </option>
+
+                    <option value="reciente"
+                        {{ request('orden') == 'reciente' ? 'selected' : '' }}>
+                        Más reciente
+                    </option>
+
+                    <option value="antiguo"
+                        {{ request('orden') == 'antiguo' ? 'selected' : '' }}>
+                        Más antiguo
+                    </option>
+
+                    <option value="az"
+                        {{ request('orden') == 'az' ? 'selected' : '' }}>
+                        A - Z
+                    </option>
+
+                    <option value="za"
+                        {{ request('orden') == 'za' ? 'selected' : '' }}>
+                        Z - A
+                    </option>
+
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-gold">
+                Aplicar filtros
+            </button>
+
+            <a href="{{ route('galeria.index') }}"
+               class="btn btn-outline">
+                Limpiar
+            </a>
+
+        </div>
+
+    </form>
+
 </div>
 
-<div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 2.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-    <form action="{{ route('galeria.index') }}" method="GET" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
-        
-        <div style="flex: 2; min-width: 250px; display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-dark);">Buscar por título de obra</label>
-            <input type="text" name="buscar" value="{{ request('buscar') }}" placeholder="Ej. El Grito, Noche Estrellada..." 
-                   style="padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.9rem; width: 100%; box-sizing: border-box;">
-        </div>
+<div class="filter-pills">
+    <a href="{{ route('galeria.index') }}"
+       class="filter-pill {{ !request('artista_id') ? 'active' : '' }}">Todos los artistas</a>
+    @foreach($artistas as $art)
+        <a href="{{ route('galeria.index', array_merge(request()->all(), ['artista_id' => $art->id])) }}"
+           class="filter-pill {{ request('artista_id') == $art->id ? 'active' : '' }}">{{ $art->nombre }}</a>
+    @endforeach
+</div>
+<div class="filter-pills" style="margin-top:15px;">
+    <a href="{{ route('galeria.index', array_merge(request()->except('tecnica'), [])) }}"
+       class="filter-pill {{ !request('tecnica') ? 'active' : '' }}">
+        Todas las técnicas
+    </a>
 
-        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 5px;">
-            <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-dark);">Filtrar por Artista</label>
-            <select name="artista_id" style="padding: 10px; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.9rem; background: #fff; width: 100%; box-sizing: border-box;">
-                <option value="">-- Todos los Artistas --</option>
-                @foreach($artistas as $art)
-                    <option value="{{ $art->id }}" {{ request('artista_id') == $art->id ? 'selected' : '' }}>
-                        {{ $art->nombre }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    @foreach($obras->pluck('tecnica')->unique() as $tec)
+        <a href="{{ route('galeria.index', array_merge(request()->all(), ['tecnica' => $tec])) }}"
+           class="filter-pill {{ request('tecnica') == $tec ? 'active' : '' }}">
+            {{ $tec }}
+        </a>
+    @endforeach
+</div>
 
-        <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn btn-gold" style="padding: 10px 20px; height: 42px;">Filtrar Catálogo</button>
-            @if(request('buscar') || request('artista_id'))
-                <a href="{{ route('galeria.index') }}" class="btn btn-outline" style="padding: 10px 15px; height: 42px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">Limpiar</a>
-            @endif
-        </div>
-    </form>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;margin:0">Sala de Exposición</h2>
+        <p style="font-size:0.78rem;color:var(--text-3);margin:4px 0 0;font-family:'DM Mono',monospace">
+            {{ $obras->count() }} obra(s) disponibles para adquisición
+        </p>
+    </div>
 </div>
 
 <div class="grid-gallery">
     @forelse($obras as $ob)
-    <div class="card-art">
-        <div style="position: relative; overflow: hidden; background: #eaeaea; height: 250px; border-bottom: 1px solid var(--border);">
+    <div class="card-art" onclick="window.location='{{ route('galeria.detalle', $ob->id) }}'">
+        <div class="card-img-wrap">
             @if($ob->imagen)
-                <img src="{{ asset('uploads/obras/'.$ob->imagen) }}" alt="{{ $ob->titulo }}" 
-                     style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" 
-                     onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <img src="{{ asset('uploads/obras/'.$ob->imagen) }}" alt="{{ $ob->titulo }}">
             @else
-                <div style="width: 100%; height: 100%; display: flex; flex-direction:column; align-items: center; justify-content: center; color: #999;">
-                    <span style="font-size: 3rem;">🖼</span>
-                    <span style="font-size: 0.8rem; margin-top: 8px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;">Fotografía en Curaduría</span>
+                <div class="card-no-img">
+                    <div class="card-no-img-icon">🖼</div>
+                    <span style="font-size:0.67rem;text-transform:uppercase;letter-spacing:1.2px;font-family:'DM Mono',monospace">Sin fotografía</span>
                 </div>
             @endif
+            <div class="card-overlay"></div>
+            <div class="card-style-tag">{{ $ob->tecnica }}</div>
+            <div class="card-overlay-cta">
+                <span class="btn btn-gold btn-sm">Ver detalle →</span>
+            </div>
         </div>
-        
-        <div style="padding: 1.5rem;">
-            <h3 style="margin: 0 0 0.4rem 0; font-size: 1.3rem; line-height: 1.2; font-family: 'Playfair Display', serif;">{{ $ob->titulo }}</h3>
-            <p style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--gold); font-weight: 500;">
-                Maestro: {{ $ob->artista->nombre ?? 'Autor Anónimo' }}
-            </p>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f5f5f5; padding-top: 1rem; margin-top: 0.5rem;">
+        <div class="card-body">
+            <div class="card-artist-name">{{ $ob->artista->nombre ?? 'Autor Anónimo' }}</div>
+            <h3 class="card-title">{{ $ob->titulo }}</h3>
+            <p class="card-meta">{{ $ob->anio }} · {{ $ob->tecnica }}</p>
+            <div class="card-footer-row">
                 <div>
-                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Valoración</span>
-                    <span style="font-size: 1.25rem; font-weight: 600; color: var(--text-dark);">S/. {{ number_format($ob->precio, 2) }}</span>
+                    <span class="card-price-lbl">Precio de adquisición</span>
+                    <span class="card-price-val">S/. {{ number_format($ob->precio, 2) }}</span>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <a href="#" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.85rem;" title="Ver Ficha Técnica">Ficha</a>
-                    
-                    <form action="{{ route('carrito.agregar', $ob->id) }}" method="POST" style="margin:0;">
+                <div class="card-actions">
+                    <a href="{{ route('galeria.detalle', $ob->id) }}" class="btn btn-outline btn-sm"
+                       onclick="event.stopPropagation()">Ver</a>
+                    <form action="{{ route('carrito.agregar', $ob->id) }}" method="POST" style="margin:0"
+                          onclick="event.stopPropagation()">
                         @csrf
-                        <button type="submit" class="btn btn-gold" style="padding: 8px 14px; font-size: 0.85rem;">Adquirir 🛒</button>
+                        <button type="submit" class="btn btn-gold btn-sm">+ Carrito</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
     @empty
-    <div style="grid-column: 1 / -1; background: white; padding: 4rem 2rem; text-align: center; border-radius: 8px; border: 1px solid var(--border);">
-        <span style="font-size: 3rem;">🔍</span>
-        <h3 style="font-size: 1.4rem; margin: 1rem 0 0.5rem 0;">No se encontraron obras concordantes</h3>
-        <p style="color: var(--text-muted); margin: 0;">Prueba modificando los criterios de búsqueda o seleccionando otro artista.</p>
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>Sin resultados</h3>
+        <p>No encontramos obras con esos criterios. <a href="{{ route('galeria.index') }}" style="color:var(--gold-dark)">Ver todo</a></p>
     </div>
     @endforelse
 </div>

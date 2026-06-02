@@ -88,4 +88,10 @@ class ObraController extends Controller {
         $obra->delete();
         return redirect()->route('obras.index')->with('success', 'Obra eliminada permanentemente.');
     }
+    public function show($id)
+    {
+        $obra = \App\Models\Obra::with('artista')->findOrFail($id);
+
+        return view('admin.obras.show', compact('obra'));
+    }
 }

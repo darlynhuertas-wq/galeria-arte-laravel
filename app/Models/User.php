@@ -19,4 +19,9 @@ class User extends Authenticatable {
         'password',
         'remember_token',
     ];
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class);
+    }
 }
+
